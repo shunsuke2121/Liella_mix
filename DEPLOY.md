@@ -59,11 +59,26 @@ audio/*.m4a              … 旧フルミックス（STEM_MODE=false 用フォ�
 - `const STEM_MODE = false;` に戻すと旧フルミックス（audio/<slug>.m4a・÷N補正あり・伴奏パネル非表示）で動く。
 
 ### 曲を増やす/別曲のステムを作る手順
-1. 声ステム → `audio/vocal/<slug>.m4a`、楽器ステム → `audio/inst/{drums,bass,brass}.m4a`。
+1. 声ステム → `audio/<song>/vocal/<slug>.m4a`、楽器ステム → `audio/<song>/inst/{full,drums,bass,(brass),other}.m4a`。
 2. 完全伴奏と「その他」を生成（ffmpeg・要フルミックスと該当ボーカル）:
    - `full = フルミックス − ボーカル`（位相反転して amix normalize=0）
    - `other = full − drums − bass − brass`
 3. すべて `-c:a aac -b:a 160k` で m4a に。全ステムは**サンプル単位で同尺・同タイミング**であること。
+4. `index.html` の `SONGS` 配列に1曲追加（`vocalBase/instBase/imgBase` と `parts` を指定）。曲セレクタに自動で並ぶ。
+
+## 曲「オレンジのままで」（2曲目・追加済み）
+音源は公式の「メンバー版フルミックス11本＋Off Vocal」から生成。**Demucsのボーカル分離はエッジ（子音・息・アタック）が削れるため不採用**。代わりに：
+- **各メンバーの声 = メンバー版 − Off Vocal（位相相殺）**。全トラックが同一マスター由来でサンプルロック（ズレ1sample・ドリフト無）のため、伴奏はイントロ区間で約35dB相殺され、**声の質感は原音無加工のまま**。チャンネル別ゲイン≒1.0。
+- **「オケ全部」(full) = 公式 Off Vocal をそのまま**（無加工・最高音質）。末尾3.79sはOff Vocalが短いが、そこは全メンバー無音区間なので問題なし。
+- **「パート選択」(drums/bass/other) = フルミックス01のDemucs 4ステム**。この曲は brass なし（`parts` で drums/bass/other のみ定義）。
+- 生成スクリプトは会話時のもの。要点：`ffmpeg -ac 2 -f f32le` で読み、numpyで `mem − gain*off` を書き出し `-c:a aac -b:a 160k`。
+- **生WAV `audio/オレンジのままで/`（513MB）は音源ソース。デプロイ除外（.vercelignore済）**。git管理も避けるならローカル保管推奨。
+
+## 重ね時の音量バランス（声↔オケ）
+「オレンジのままで」は各メンバーが曲全体をリード歌唱するフルコーラス版のため、単純に重ねると人数ぶん声が大きくなりオケが埋もれる。対策として**声専用バス `vocalBus` を `1/√N`（N＝重ねた人数）で正規化**。
+- オケ（backing）は固定レベル → 何人重ねても「声−オケ」比が約−3〜−4dBで一定（原曲フルミックスの比 −4.6dB とほぼ同等）。補正なしだと11人で声がオケ+7dBまで突出していた。
+- 1人時は `vocalBus=1.0` で従来と同じ。`声↔オケ` つまみ（`#voice`, 既定1.0／0.3〜1.6）で声とオケの比を手動微調整可。
+- 実装：`applyGains()` で `vocalBus.gain = voiceLevel/√N`、`masterGain=userMaster`（ピークはリミッターで保護）。
 
 ## 定位（パン）
 - 「重ねているメンバー」の各行で **音量** と **左右(パン)** を個別に固定できる（各声のL/Rは自分で決める）。
