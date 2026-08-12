@@ -5,14 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Liella! ボーカル重ねミキサー</title>
 <style>
-  :root{--ink:#33313a;--sub:#9a94a6;--line:#eceaf1;--bg:#fff;--band:#f3f1f7;--pink:#ff6fa5;--blue:#5b8cff}
+  :root{--ink:#2a2740;--sub:#8f8aa3;--line:#e9e7f2;--bg:#fff;--band:#f2f1fa;
+    --pink:#ff2d6b;--blue:#2e47fb;               /* アクセント */
+    --grad:linear-gradient(135deg,#2e47fb 0%,#e40080 55%,#ff0043 100%)} /* 公式スーパースターのブランドグラデ */
   *{box-sizing:border-box}
   html,body{margin:0}
-  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  body{font-family:"Noto Sans JP","Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  body::before{content:"";position:fixed;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#2e47fb,#e40080,#ff0043);z-index:100}
   .wrap{max-width:1000px;margin:0 auto;padding:22px 18px 96px}
   .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
-  .top h1{font-size:19px;margin:0;font-weight:800;letter-spacing:.02em}
-  .song{font-size:12px;font-weight:800;color:#fff;padding:4px 12px;border-radius:999px;background:linear-gradient(90deg,var(--pink),var(--blue))}
+  .top h1{margin:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .top h1 .brand{font-size:22px;font-weight:900;letter-spacing:.01em;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+  .top h1 .prod{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:.02em}
+  .song{font-size:12px;font-weight:800;color:#fff;padding:4px 12px;border-radius:999px;background:var(--grad)}
   .songSel{margin-left:auto;font-family:inherit;font-size:12.5px;font-weight:800;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer}
   .songSel:hover{border-color:var(--pink)}
   .sub{color:var(--sub);font-size:12.5px;line-height:1.7;margin:6px 0 0}
@@ -35,7 +40,57 @@
   .hero .art img{position:absolute;right:0;bottom:-22px;height:230px;max-width:200px;object-fit:contain;object-position:bottom;filter:drop-shadow(0 6px 14px rgba(0,0,0,.12));transition:opacity .25s}
   @media(max-width:560px){.hero .jp{font-size:26px}.hero .art{width:120px}.hero .art img{height:170px;max-width:140px}}
 
-  .cluster{display:flex;flex-wrap:wrap;justify-content:center;gap:16px 18px;margin:26px auto 6px;max-width:760px}
+  .presets{max-width:820px;margin:18px auto 0;display:flex;flex-direction:column;gap:9px}
+  .pgroup{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+  .pgroup .plabel{font-weight:800;color:var(--sub);font-size:11.5px;background:#f3f1f7;border-radius:999px;padding:5px 11px;white-space:nowrap}
+  .preset{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 15px;font-size:13px;font-weight:800;cursor:pointer;color:var(--sub);transition:.15s;display:inline-flex;align-items:center;gap:6px}
+  .preset .cnt{font-size:11px;font-weight:800;opacity:.65}
+  .preset .del{font-size:10px;opacity:.6;margin:-2px -4px -2px 1px;padding:2px 4px;border-radius:50%}
+  .preset .del:hover{opacity:1;background:rgba(0,0,0,.08)}
+  .preset:hover{border-color:var(--pink);color:var(--pink)}
+  .preset:active{transform:scale(.96)}
+  .preset.on{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(46,71,251,.28)}
+  .preset.on .cnt,.preset.on .del{opacity:.9}
+  .psave{border:1.5px dashed var(--pink);background:#fff;color:var(--pink);border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:800;cursor:pointer;transition:.15s}
+  .psave:hover{background:var(--pink);color:#fff}
+  .psave:active{transform:scale(.96)}
+
+  /* コントロールカード（タブ） */
+  .ccard{max-width:820px;margin:18px auto 0;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 4px 16px rgba(80,60,120,.06);overflow:hidden}
+  .tabs{display:flex;align-items:center;gap:4px;padding:8px 10px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,rgba(46,71,251,.06),rgba(255,0,67,.06))}
+  .tab{border:none;background:transparent;font-family:inherit;font-weight:800;font-size:13.5px;color:var(--sub);padding:8px 16px;border-radius:999px;cursor:pointer;transition:.15s}
+  .tab:hover{color:var(--pink)}
+  .tab.sel{background:var(--grad);color:#fff;box-shadow:0 3px 10px rgba(46,71,251,.28)}
+  .rec{margin-left:auto;font-size:11.5px;font-weight:800;color:#e8437a;white-space:nowrap;opacity:0;transition:.2s}
+  .rec.on{opacity:1}
+  .rec .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#e8437a;margin-right:5px;vertical-align:middle;animation:blink 1s steps(2,start) infinite}
+  @keyframes blink{50%{opacity:.25}}
+  .tabpane{padding:14px 16px}
+  .tabpane.hide{display:none}
+  #pane-compose .presets{margin:0}
+
+  /* タイムライン */
+  .tlmode{margin:0 0 4px}
+  .tlhint{font-size:11.5px;color:var(--sub);line-height:1.6;margin:8px 0 10px}
+  .tlbar{position:relative;height:34px;border-radius:9px;background:#f3f1f7;border:1px solid var(--line);overflow:hidden;cursor:pointer}
+  .tlbar .seg-c{position:absolute;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;overflow:hidden;white-space:nowrap;border-left:1px solid rgba(255,255,255,.7)}
+  .tlbar .ph{position:absolute;top:-2px;bottom:-2px;width:2px;background:#222;box-shadow:0 0 0 1px rgba(255,255,255,.6);pointer-events:none}
+  .tlbar .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--sub)}
+  .cues{margin-top:10px;display:flex;flex-direction:column;gap:6px;max-height:210px;overflow:auto}
+  .cue{display:flex;align-items:center;gap:10px;background:#faf9fc;border:1px solid var(--line);border-radius:10px;padding:7px 10px;cursor:pointer;transition:.12s}
+  .cue:hover{border-color:var(--pink)}
+  .cue .ct{font-variant-numeric:tabular-nums;font-weight:800;font-size:12.5px;color:var(--ink);min-width:44px}
+  .cue .cdot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+  .cue .cl{flex:1;font-size:12.5px;font-weight:800;color:var(--cd,var(--ink));min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cue .cn{font-size:11px;color:var(--sub)}
+  .cue .cx{border:none;background:transparent;color:var(--sub);font-size:12px;cursor:pointer;padding:4px 6px;border-radius:50%}
+  .cue .cx:hover{background:rgba(0,0,0,.08);color:#e8437a}
+  .cues .empty{text-align:center;color:var(--sub);font-size:12px;padding:6px}
+  .tlactions{display:flex;align-items:center;gap:8px;margin-top:11px;flex-wrap:wrap}
+  .tlload{font-family:inherit;font-size:12.5px;font-weight:800;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer}
+  .tlload:hover{border-color:var(--pink)}
+
+  .cluster{display:flex;flex-wrap:wrap;justify-content:center;gap:16px 18px;margin:20px auto 6px;max-width:760px}
   .av{position:relative;width:84px;cursor:pointer;text-align:center;user-select:none;outline:none}
   .av .ring{width:78px;height:78px;margin:0 auto;border-radius:50%;padding:4px;background:#e7e5ec;transition:.18s}
   .av .ring img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;filter:grayscale(.85) opacity(.6);transition:.18s;background:#fff}
@@ -62,37 +117,77 @@
   .strip .r input{flex:1;accent-color:var(--c)}
   .strip .empty{text-align:center;color:var(--sub);font-size:13px;padding:8px}
 
-  .backing{max-width:760px;margin:20px auto 0;background:#fbfaff;border:1px solid var(--line);border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-  .backing .lbl{font-weight:800;color:var(--ink);font-size:13px}
+  .backing .lbl{font-weight:800;color:var(--ink);font-size:12.5px}
   .backing .parts{display:flex;gap:7px;flex-wrap:wrap}
-  .pchip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:800;cursor:pointer;color:var(--sub);transition:.15s}
+  .pchip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 13px;font-size:12.5px;font-weight:800;cursor:pointer;color:var(--sub);transition:.15s}
   .pchip.on{background:#3a3550;color:#fff;border-color:#3a3550}
   .backing.hide,.knob.hide{display:none}
 
-  .bar{position:sticky;bottom:14px;margin:20px auto 0;max-width:760px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 16px;box-shadow:0 10px 30px rgba(80,60,120,.12)}
-  .tp{display:flex;align-items:center;gap:13px;flex-wrap:wrap}
-  .play{width:52px;height:52px;border:none;border-radius:50%;cursor:pointer;flex:0 0 auto;color:#fff;font-size:20px;background:linear-gradient(135deg,var(--pink),var(--blue));display:grid;place-items:center;box-shadow:0 6px 16px rgba(255,111,165,.4);transition:.15s}
+  /* メンバー調整 折りたたみ */
+  .stripwrap{max-width:760px;margin:14px auto 0}
+  .strip-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 15px;font-family:inherit;font-size:13px;font-weight:800;color:var(--ink);cursor:pointer;transition:.15s}
+  .strip-toggle:hover{border-color:var(--pink)}
+  .strip-toggle .scount{color:var(--sub);font-weight:800;margin-left:6px}
+  .strip-toggle .chev{color:var(--sub);transition:transform .2s}
+  .strip-toggle.open .chev{transform:rotate(180deg)}
+  .strip{margin-top:10px}
+  .strip.hide{display:none}
+
+  /* 設定パネル（非固定） */
+  .panel{max-width:760px;margin:16px auto 0;background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px 16px;box-shadow:0 4px 16px rgba(80,60,120,.06)}
+  .panlbl{font-weight:800;color:var(--ink)}
+  .pandesc{color:var(--sub);flex:1 1 100%;font-size:11.5px}
+
+  /* 固定トランスポート（スリム） */
+  .bar{position:sticky;bottom:12px;margin:16px auto 0;max-width:760px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:18px;padding:12px 16px;box-shadow:0 10px 30px rgba(80,60,120,.14)}
+  .tp{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .play{width:54px;height:54px;border:none;border-radius:50%;cursor:pointer;flex:0 0 auto;color:#fff;font-size:21px;background:var(--grad);display:grid;place-items:center;box-shadow:0 6px 16px rgba(46,71,251,.35);transition:.15s}
   .play:active{transform:scale(.94)}
-  .time{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--sub);min-width:92px}
-  .seek{flex:1 1 160px;accent-color:var(--pink)}
-  input[type=range]{cursor:pointer}
-  .ctl{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--sub)}
-  .ctl+.ctl{margin-top:9px;padding-top:11px;border-top:1px dashed var(--line)}
-  .chk{display:flex;align-items:center;gap:5px;cursor:pointer}
+  .time{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--sub);min-width:88px}
+  .seek{flex:1 1 100%;order:5}
+  input[type=range]{cursor:pointer;accent-color:var(--pink);height:22px}
+  .ctl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--sub)}
+  .ctl+.ctl{margin-top:10px;padding-top:11px;border-top:1px dashed var(--line)}
+  .chk{display:flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap}
+  .chk input{width:18px;height:18px;accent-color:var(--pink)}
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
-  .seg button{border:none;background:#fff;padding:6px 13px;font-size:12px;font-weight:800;cursor:pointer;color:var(--sub)}
-  .seg button.sel{background:linear-gradient(90deg,var(--pink),var(--blue));color:#fff}
-  .knob{display:flex;align-items:center;gap:7px}.knob input{width:96px}
-  .knob.voice input{accent-color:var(--pink)}
-  .btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;color:var(--sub)}
+  .seg button{border:none;background:#fff;padding:8px 15px;font-size:12.5px;font-weight:800;cursor:pointer;color:var(--sub)}
+  .seg button.sel{background:var(--grad);color:#fff}
+  .knob{display:flex;align-items:center;gap:8px;flex:1 1 240px}.knob>span{white-space:nowrap;font-weight:800}.knob input{flex:1;min-width:80px}
+  .btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:800;cursor:pointer;color:var(--sub)}
   .btn:hover{border-color:var(--pink);color:var(--pink)}
-  .hint{max-width:760px;margin:16px auto 0;font-size:12px;color:var(--sub);line-height:1.8}
+  .btn:active{transform:scale(.96)}
+  .hint{max-width:760px;margin:14px auto 0;font-size:12px;color:var(--sub);line-height:1.8}
   kbd{background:#f6f5f9;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;font-size:11px;font-family:inherit}
+
+  /* スマホ最適化 */
+  @media(max-width:560px){
+    .wrap{padding:16px 12px 90px}
+    .top h1{font-size:17px}
+    .songSel{margin-left:0;flex:1 1 100%;order:3;padding:8px 12px;font-size:13px}
+    .sub{font-size:12px}
+    .cluster{gap:12px 10px;margin:18px auto 4px}
+    .av{width:70px}.av .ring{width:64px;height:64px}.av .nm{font-size:11px}
+    .av .badge{right:2px;width:22px;height:22px}
+    .strip .r{padding:10px 12px}.strip .r .n{min-width:72px;font-size:12.5px}
+    .strip .r .grp.vol{flex:1 1 46%}.strip .r .grp.pan{flex:1 1 46%}
+    .backing .knob{flex:1 1 100%}
+    .pchip{padding:8px 14px;font-size:12.5px}
+    .ccard,.bar{border-radius:16px}
+    .tabpane{padding:12px}
+    .tab{padding:8px 13px;font-size:13px}
+    .knob{flex:1 1 100%}
+    .pandesc{display:none}
+    input[type=range]{height:30px}
+    .time{min-width:0;font-size:13px}
+    .play{width:56px;height:56px}
+  }
 </style>
 </head>
 <body>
+<audio id="mediaSink" playsinline style="display:none"></audio>
 <div class="wrap">
-  <div class="top"><h1>Liella! ボーカル重ねミキサー</h1><span class="song" id="song"></span>
+  <div class="top"><h1><span class="brand">✦Liella!</span><span class="prod">ボーカル重ねミキサー</span></h1><span class="song" id="song"></span>
     <select id="songSel" class="songSel" aria-label="曲を選ぶ"></select></div>
   <p class="sub">丸アイコンを押すと、その子の歌が<b>重なって</b>聞こえます。伴奏（オケ）は下で「全部」か「パート選択」に切り替え。全員ぴったり同じタイミングで<b>ズレません</b>。</p>
   <div class="warn" id="warn">⚠️ <code>file://</code> で直接開いています。音源の自動読み込みには <code>start.bat</code> からの起動が必要です。</div>
@@ -109,35 +204,70 @@
     </div>
   </section>
 
-  <div class="cluster" id="cluster"></div>
-  <div class="strip" id="strip"></div>
-
-  <!-- 伴奏（オケ） -->
-  <div class="backing" id="backing">
-    <span class="lbl">オケ（伴奏）：</span>
-    <span class="seg" id="bkmode"><button data-b="all" class="sel">オケ全部</button><button data-b="parts">パート選択</button></span>
-    <span class="parts" id="bkparts"></span>
-    <span class="knob" style="margin-left:auto"><span>オケ音量</span><input type="range" id="bkvol" min="0" max="1.4" step="0.01" value="0.9"></span>
+  <!-- コントロールカード（構成 / タイムライン タブ） -->
+  <div class="ccard">
+    <div class="tabs">
+      <button class="tab sel" data-tab="compose">構成</button>
+      <button class="tab" data-tab="timeline">タイムライン</button>
+      <button class="tab" data-tab="settings">設定</button>
+      <span class="rec" id="recInd"></span>
+    </div>
+    <div class="tabpane" id="pane-compose">
+      <div class="presets" id="presets"></div>
+    </div>
+    <div class="tabpane hide" id="pane-timeline">
+      <span class="seg tlmode" id="tlmode"><button data-tl="off" class="sel">オフ</button><button data-tl="rec">記録</button><button data-tl="auto">自動</button></span>
+      <div class="tlhint" id="tlhint"></div>
+      <div class="tlbar" id="tlbar" title="クリックでその位置へ"></div>
+      <div class="cues" id="cues"></div>
+      <div class="tlactions">
+        <button class="btn" id="tlclear">全消去</button>
+        <button class="btn" id="tlsave">保存</button>
+        <select class="tlload" id="tlload"><option value="">呼び出し…</option></select>
+      </div>
+    </div>
+    <!-- 設定タブ：モード・音量・オケ・定位 -->
+    <div class="tabpane hide" id="pane-settings">
+      <div class="ctl">
+        <span class="seg" id="mode"><button data-m="layer" class="sel">重ね</button><button data-m="solo">ソロ切替</button></span>
+        <button class="btn" id="reset">かのんだけに</button>
+      </div>
+      <div class="ctl">
+        <span class="knob voice" id="voiceKnob" title="声とオケのバランス（右で声を前に）"><span>声↔オケ</span><input type="range" id="voice" min="0.3" max="1.6" step="0.01" value="1.0"></span>
+        <span class="knob"><span>全体</span><input type="range" id="master" min="0" max="1" step="0.01" value="0.9"></span>
+      </div>
+      <div class="ctl backing" id="backing">
+        <span class="lbl">オケ</span>
+        <span class="seg" id="bkmode"><button data-b="all" class="sel">オケ全部</button><button data-b="parts">パート選択</button></span>
+        <span class="parts" id="bkparts"></span>
+        <span class="knob" style="flex:1 1 130px"><span>音量</span><input type="range" id="bkvol" min="0" max="1.4" step="0.01" value="0.9"></span>
+      </div>
+      <div class="ctl">
+        <span class="panlbl">定位（L/R）</span>
+        <button class="btn" id="spread">左右に自動配置</button>
+        <button class="btn" id="center">中央に戻す</button>
+        <span class="pandesc">各声の左右は下の「メンバー調整」で個別に設定できます。</span>
+      </div>
+    </div>
   </div>
 
+  <div class="cluster" id="cluster"></div>
+
+  <!-- 各メンバーの音量・パン（折りたたみ） -->
+  <div class="stripwrap" id="stripwrap">
+    <button class="strip-toggle" id="stripToggle" aria-expanded="false">
+      <span>各メンバーの音量・パン<span class="scount" id="stripCount"></span></span><span class="chev">▾</span>
+    </button>
+    <div class="strip hide" id="strip"></div>
+  </div>
+
+  <!-- 固定トランスポート -->
   <div class="bar">
     <div class="tp">
       <button class="play" id="play">▶</button>
       <span class="time" id="time">0:00 / 0:00</span>
-      <input class="seek" type="range" id="seek" min="0" max="1000" value="0" step="1">
       <label class="chk"><input type="checkbox" id="loop" checked> ループ</label>
-    </div>
-    <div class="ctl">
-      <span class="seg" id="mode"><button data-m="layer" class="sel">重ね</button><button data-m="solo">ソロ切替</button></span>
-      <span class="knob voice" id="voiceKnob" title="声とオケのバランス（右で声を前に）"><span>声↔オケ</span><input type="range" id="voice" min="0.3" max="1.6" step="0.01" value="1.0"></span>
-      <span class="knob"><span>全体</span><input type="range" id="master" min="0" max="1" step="0.01" value="0.9"></span>
-      <button class="btn" id="reset">かのんだけに</button>
-    </div>
-    <div class="ctl">
-      <span style="font-weight:800;color:var(--ink)">定位：</span>
-      <span>各声のL/Rは「重ねているメンバー」で個別に決められます。</span>
-      <button class="btn" id="spread">左右に自動配置</button>
-      <button class="btn" id="center">中央に戻す</button>
+      <input class="seek" type="range" id="seek" min="0" max="1000" value="0" step="1">
     </div>
   </div>
 
@@ -175,14 +305,35 @@ const SONGS = [
             {key:"bass", label:"ベース",file:"bass.m4a"},
             {key:"brass",label:"管楽器",file:"brass.m4a"},
             {key:"other",label:"その他",file:"other.m4a"} ] },
-  { id:"orange", title:"オレンジのままで", stem:true, members:MEMBERS,
+  { id:"orange", title:"オレンジのままで", stem:true, members:MEMBERS, cover:"img/orange_cover.jpg",
     fullBase:"audio/orange/", vocalBase:"audio/orange/vocal/", instBase:"audio/orange/inst/", imgBase:"img/",
     full:{file:"full.m4a"},
     parts:[ {key:"drums",label:"ドラム",file:"drums.m4a"},
             {key:"bass", label:"ベース",file:"bass.m4a"},
             {key:"other",label:"その他",file:"other.m4a"} ] },
 ];
-let curSong = SONGS[0];
+const _savedState = (()=>{try{return JSON.parse(localStorage.getItem("liella_state"));}catch(e){return null;}})();
+let curSong = (_savedState && SONGS.find(s=>s.id===_savedState.song)) || SONGS[0];
+
+/* 重ね方プリセット。slugs=null は全員。両曲共通。cat でカテゴリ分け */
+const GROUPS = [
+  {id:"all", label:"全員",  cat:"期別", slugs:null},
+  {id:"inst",label:"オケのみ", cat:"期別", slugs:[]},
+  {id:"g1",  label:"1期生", cat:"期別", slugs:["kanon","keke","chisato","sumire","ren"]},
+  {id:"g2",  label:"2期生", cat:"期別", slugs:["kinako","mei","shiki","natsumi"]},
+  {id:"g3",  label:"3期生", cat:"期別", slugs:["margarete","fuyumari"]},
+  {id:"catchu",   label:"CatChu!",      cat:"ユニット", slugs:["kanon","sumire","mei"]},
+  {id:"kaleido",  label:"KALEIDOSCORE", cat:"ユニット", slugs:["keke","ren","margarete"]},
+  {id:"syncrise", label:"5yncri5e!",    cat:"ユニット", slugs:["chisato","kinako","shiki","natsumi","fuyumari"]},
+];
+const PRESET_CATS = ["期別","ユニット"];
+
+/* マイセットリスト（ユーザー保存・localStorage永続） */
+const LS_KEY="liella_setlists";
+function loadSetlists(){try{return JSON.parse(localStorage.getItem(LS_KEY))||[]}catch(e){return[]}}
+function saveSetlists(a){try{localStorage.setItem(LS_KEY,JSON.stringify(a))}catch(e){}}
+let userSets=loadSetlists();
+const allPresets=()=>GROUPS.concat(userSets);
 
 const hex2rgb=h=>{h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.substr(i,2),16));};
 const lum=h=>{const[r,g,b]=hex2rgb(h);return (0.299*r+0.587*g+0.114*b)/255;};
@@ -195,13 +346,28 @@ const ctx=new AC();
 const masterGain=ctx.createGain();
 const limiter=ctx.createDynamicsCompressor();
 limiter.threshold.value=-8;limiter.knee.value=6;limiter.ratio.value=12;limiter.attack.value=0.003;limiter.release.value=0.25;
-masterGain.connect(limiter);limiter.connect(ctx.destination);
+masterGain.connect(limiter);
+/* 実音は標準出力。ロック画面/通知（Media Session）は、無音の<audio>を“アンカー”として鳴らして出す。
+   Web Audioだけだと通知が出ないブラウザがあるための定番手法。 */
+limiter.connect(ctx.destination);
+const mediaSink=document.getElementById('mediaSink');
+function makeSilentSrc(sec){
+  const sr=8000,n=sr*sec,buf=new ArrayBuffer(44+n),v=new DataView(buf);
+  const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
+  w(0,'RIFF');v.setUint32(4,36+n,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);
+  v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr,true);
+  v.setUint16(32,1,true);v.setUint16(34,8,true);w(36,'data');v.setUint32(40,n,true);
+  for(let i=0;i<n;i++)v.setUint8(44+i,128);
+  return URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));
+}
+try{ mediaSink.src=makeSilentSrc(3); mediaSink.loop=true; }catch(e){}
 const backingGain=ctx.createGain(); backingGain.gain.value=0.9; backingGain.connect(masterGain);
 /* 声専用バス：重ねた人数で 1/√N 正規化し、オケとのバランスを保つ */
 const vocalBus=ctx.createGain(); vocalBus.gain.value=1; vocalBus.connect(masterGain);
 
 let userMaster=0.9, voiceLevel=1.0;
 let mode='layer', isPlaying=false, startTime=0, pausedOffset=0, duration=0, raf=null, focus=0;
+let tlMode='off', cues=[], tlActiveIdx=-1;   /* タイムライン */
 
 function buildMembers(song){
   return song.members.map(m=>({...m,cd:textCol(m.c),cglow:tint(m.c,0.55),
@@ -255,7 +421,7 @@ function renderHero(){
   hero.style.setProperty('--hc',tint(f.c,0.30));hero.style.setProperty('--hcd',f.cd);
   const art=$('#hArt');art.src=artUrl(f);art.alt=f.name;art.style.opacity=n?1:.32;
   $('#hJp').textContent=f.name;$('#hEn').textContent=f.en;$('#hCv').textContent=f.cv;
-  $('#hCount').textContent=n===0?'メンバーを選んでね':n===1?'SOLO / 1人':`合唱中 / ${n}人`;
+  $('#hCount').textContent=n===0?'オケ（伴奏）のみ':n===1?'SOLO / 1人':`合唱中 / ${n}人`;
   const chips=$('#hChips');chips.innerHTML='';
   if(n>=2) M.filter(m=>m.enabled).forEach(m=>{const s=document.createElement('span');s.className='mini';s.style.borderColor=tint(m.c,0.6);
     s.innerHTML=`<img src="${iconUrl(m)}" alt=""><span style="color:${m.cd}">${m.name}</span>`;chips.appendChild(s);});
@@ -265,16 +431,221 @@ function renderHero(){
 function renderStrip(){
   strip.innerHTML='';
   const on=M.map((m,i)=>({m,i})).filter(x=>x.m.enabled);
+  const sc=$('#stripCount');if(sc)sc.textContent=on.length?`（${on.length}人）`:'';
   if(!on.length){strip.innerHTML='<div class="empty">まだ誰も選ばれていません</div>';return;}
   on.forEach(({m})=>{
     const r=document.createElement('div');r.className='r';r.style.cssText=`--c:${m.c};--cd:${m.cd}`;
     r.innerHTML=`<img src="${iconUrl(m)}" alt=""><span class="n">${m.name}</span>
       <span class="grp vol">🔊<input type="range" class="v" min="0" max="1" step="0.01" value="${m.volume}"></span>
       <span class="grp pan">L<input type="range" class="p" min="-1" max="1" step="0.01" value="${m.pan}">R</span>`;
-    r.querySelector('.v').addEventListener('input',e=>{m.volume=+e.target.value;if(m.gainNode)m.gainNode.gain.setTargetAtTime(m.volume,ctx.currentTime,.01);});
-    r.querySelector('.p').addEventListener('input',e=>{m.pan=+e.target.value;if(m.panner)m.panner.pan.setTargetAtTime(m.pan,ctx.currentTime,.02);});
+    r.querySelector('.v').addEventListener('input',e=>{m.volume=+e.target.value;if(m.gainNode)m.gainNode.gain.setTargetAtTime(m.volume,ctx.currentTime,.01);saveState();});
+    r.querySelector('.p').addEventListener('input',e=>{m.pan=+e.target.value;if(m.panner)m.panner.pan.setTargetAtTime(m.pan,ctx.currentTime,.02);saveState();});
     strip.appendChild(r);
   });
+}
+
+/* 重ね方プリセット（期別・ユニット・マイセット） */
+function chip(g,deletable){
+  const n=g.slugs?g.slugs.length:M.length;
+  const b=document.createElement('button');
+  b.className='preset';b.dataset.g=g.id;
+  b.innerHTML=`<span class="lb">${g.label}</span>`+(n>0?`<span class="cnt">${n}</span>`:``)+(deletable?`<span class="del" title="削除">✕</span>`:``);
+  b.addEventListener('click',e=>{
+    if(e.target.classList.contains('del')){ e.stopPropagation(); deleteSetlist(g.id); return; }
+    applyPreset(g);
+  });
+  return b;
+}
+function buildPresets(){
+  const box=$('#presets'); box.innerHTML='';
+  // 期別・ユニット
+  PRESET_CATS.forEach(cat=>{
+    const row=document.createElement('div');row.className='pgroup';
+    row.innerHTML=`<span class="plabel">${cat}</span>`;
+    GROUPS.filter(g=>g.cat===cat).forEach(g=>row.appendChild(chip(g,false)));
+    box.appendChild(row);
+  });
+  // マイセット
+  const row=document.createElement('div');row.className='pgroup myset';
+  row.innerHTML=`<span class="plabel">マイセット</span>`;
+  userSets.forEach(g=>row.appendChild(chip(g,true)));
+  const save=document.createElement('button');
+  save.className='psave';save.textContent='＋今の構成を保存';
+  save.addEventListener('click',saveCurrentSetlist);
+  row.appendChild(save);
+  box.appendChild(row);
+  updatePresetUI();
+}
+/* メンバー集合を適用（slugs=null は全員）。タイムライン自動切替でも使用 */
+async function setMembers(slugs){
+  const set=slugs?new Set(slugs):null;
+  mode='layer';[...$('#mode').children].forEach(x=>x.classList.toggle('sel',x.dataset.m==='layer'));
+  M.forEach((m,i)=>{ m.enabled = set? set.has(m.slug): true; updateAvatar(i); });
+  focus=Math.max(0, M.findIndex(m=>m.enabled));
+  updateMediaMeta();                 // 情報は即時更新（読込を待たない）
+  if(isPlaying){
+    await Promise.all(M.map((m,i)=>m.enabled&&!m.buffer?ensureLoaded(m,i):null).filter(Boolean));
+    const off=currentPos();
+    M.forEach(m=>{ if(m.enabled && m.buffer && !m.source) startSource(m,off); });
+  }
+  refresh();
+}
+async function applyPreset(g){
+  const t=currentPos();                 // タップ時刻を先に確定（読込待ちでズレないように）
+  await setMembers(g.slugs);
+  if(tlMode==='rec') addCue(t, g.slugs?[...g.slugs]:M.map(m=>m.slug), g.label);
+}
+function saveCurrentSetlist(){
+  const slugs=M.filter(m=>m.enabled).map(m=>m.slug);
+  if(!slugs.length){ alert('メンバーを1人以上選んでから保存してください。'); return; }
+  const name=(prompt('セットリスト名を入力',`マイセット${userSets.length+1}`)||'').trim();
+  if(!name) return;
+  userSets.push({id:'u'+Date.now(), label:name, slugs});
+  saveSetlists(userSets); buildPresets();
+}
+function deleteSetlist(id){
+  const g=userSets.find(s=>s.id===id); if(!g) return;
+  if(!confirm(`「${g.label}」を削除しますか？`)) return;
+  userSets=userSets.filter(s=>s.id!==id);
+  saveSetlists(userSets); buildPresets();
+}
+function currentPresetId(){
+  const on=M.filter(m=>m.enabled).map(m=>m.slug).sort().join(',');
+  for(const g of allPresets()){
+    const gs=(g.slugs?[...g.slugs]:M.map(m=>m.slug)).sort().join(',');
+    if(gs===on) return g.id;
+  }
+  return null;
+}
+function updatePresetUI(){
+  const id=currentPresetId();
+  [...$('#presets').querySelectorAll('.preset')].forEach(b=>b.classList.toggle('on',b.dataset.g===id));
+}
+
+/* ===== タイムライン（時間でメンバー自動切替） ===== */
+function segLabel(slugs){
+  const key=[...slugs].sort().join(',');
+  for(const g of allPresets()){const gs=(g.slugs?[...g.slugs]:M.map(m=>m.slug)).sort().join(',');if(gs===key)return g.label;}
+  return slugs.length+'人';
+}
+function cueColor(slugs){
+  if(!slugs.length) return '#bbb';
+  if(slugs.length>=M.length) return null; // 全員=グラデ
+  const m=M.find(x=>x.slug===slugs[0]); return m?m.c:'#888';
+}
+function addCue(t,slugs,label){
+  t=Math.max(0,Math.round(t*10)/10);
+  const near=cues.find(c=>Math.abs(c.t-t)<0.4);
+  if(near){near.slugs=slugs.slice();near.label=label;}
+  else cues.push({t,slugs:slugs.slice(),label});
+  cues.sort((a,b)=>a.t-b.t);
+  tlActiveIdx=-1; renderCues(); updateRecInd();
+}
+function deleteCue(i){cues.splice(i,1);tlActiveIdx=-1;renderCues();updateRecInd();}
+function clearCues(){if(cues.length&&!confirm('タイムラインを全消去しますか？'))return;cues=[];tlActiveIdx=-1;renderCues();updateRecInd();}
+function renderTLBar(){
+  const bar=$('#tlbar');bar.innerHTML='';
+  const dur=duration||234;
+  if(!cues.length){bar.innerHTML='<span class="empty">記録なし</span>';}
+  else cues.forEach((c,i)=>{
+    const next=i<cues.length-1?cues[i+1].t:dur;
+    const left=Math.max(0,Math.min(100,c.t/dur*100));
+    const w=Math.max(1.5,Math.min(100-left,(next-c.t)/dur*100));
+    const seg=document.createElement('div');seg.className='seg-c';
+    seg.style.left=left+'%';seg.style.width=w+'%';
+    const col=cueColor(c.slugs);seg.style.background=col||'var(--grad)';
+    seg.textContent=c.label||segLabel(c.slugs);seg.title=`${fmt(c.t)}〜 ${seg.textContent}`;
+    bar.appendChild(seg);
+  });
+  const ph=document.createElement('div');ph.className='ph';ph.style.left=(currentPos()/(duration||234)*100)+'%';bar.appendChild(ph);
+}
+function renderCues(){
+  const box=$('#cues');box.innerHTML='';
+  if(!cues.length){box.innerHTML='<div class="empty">まだ記録がありません</div>';}
+  cues.forEach((c,i)=>{
+    const col=cueColor(c.slugs);
+    const row=document.createElement('div');row.className='cue';
+    row.innerHTML=`<span class="ct">${fmt(c.t)}</span><span class="cdot" style="background:${col||'#c98cff'}"></span><span class="cl">${c.label||segLabel(c.slugs)}</span><span class="cn">${c.slugs.length}人</span><button class="cx" title="削除">✕</button>`;
+    row.addEventListener('click',e=>{if(e.target.classList.contains('cx')){e.stopPropagation();deleteCue(i);return;}seekTo(c.t);});
+    box.appendChild(row);
+  });
+  renderTLBar();
+}
+function setTlMode(m){
+  tlMode=m;
+  [...$('#tlmode').children].forEach(x=>x.classList.toggle('sel',x.dataset.tl===m));
+  $('#tlhint').textContent = m==='rec'
+    ? '再生しながら「構成」タブでプリセット/アイコンをタップ → その瞬間に登録。同時刻は上書き。'
+    : m==='auto' ? '再生すると、登録した時間で自動的にメンバーが切り替わります。'
+    : 'タイムラインは停止中（手動操作）。「記録」で作成、「自動」で再生。';
+  if(m==='auto'){tlActiveIdx=-1;preloadTimeline();}
+  updateRecInd();
+}
+function updateRecInd(){
+  const el=$('#recInd');
+  if(tlMode==='rec'){el.classList.add('on');el.innerHTML=`<span class="dot"></span>記録中 ${fmt(currentPos())}・${cues.length}点`;}
+  else if(tlMode==='auto'&&cues.length){el.classList.add('on');el.textContent=`自動再生・${cues.length}点`;}
+  else{el.classList.remove('on');el.textContent='';}
+}
+function preloadTimeline(){
+  const need=new Set();cues.forEach(c=>c.slugs.forEach(s=>need.add(s)));
+  M.forEach((m,i)=>{if(need.has(m.slug)&&!m.buffer&&!m.loading)ensureLoaded(m,i);});
+}
+function timelineTick(p){
+  if(tlMode!=='auto'||!cues.length)return;
+  let idx=-1;for(let i=0;i<cues.length;i++){if(cues[i].t<=p+0.03)idx=i;else break;}
+  if(idx!==tlActiveIdx){tlActiveIdx=idx;if(idx>=0)setMembers(cues[idx].slugs);}
+}
+/* 保存タイムライン（localStorage） */
+const LS_TL="liella_timelines";
+function loadTimelines(){try{return JSON.parse(localStorage.getItem(LS_TL))||[]}catch(e){return[]}}
+function saveTimelines(a){try{localStorage.setItem(LS_TL,JSON.stringify(a))}catch(e){}}
+let userTimelines=loadTimelines();
+function refreshTLLoad(){
+  const s=$('#tlload');s.innerHTML='<option value="">呼び出し…</option>';
+  userTimelines.forEach((t,i)=>{const o=document.createElement('option');o.value=i;o.textContent=`▶ ${t.label} (${t.cues.length}点)`;s.appendChild(o);});
+}
+function saveTimeline(){
+  if(!cues.length){alert('先にタイムラインを記録してください。');return;}
+  const name=(prompt('タイムライン名を入力',`${curSong.title} セトリ`)||'').trim();if(!name)return;
+  userTimelines.push({id:'t'+Date.now(),label:name,song:curSong.title,cues:cues.map(c=>({t:c.t,slugs:c.slugs.slice(),label:c.label}))});
+  saveTimelines(userTimelines);refreshTLLoad();
+}
+function loadTimeline(idx){
+  const t=userTimelines[idx];if(!t)return;
+  cues=t.cues.map(c=>({t:c.t,slugs:c.slugs.slice(),label:c.label}));tlActiveIdx=-1;renderCues();setTlMode('auto');
+}
+
+/* ===== 前回の状態を記憶（曲・選択・音量・設定を次回起動で復元） ===== */
+const LS_STATE="liella_state";
+let _saveT=null;
+function saveState(){
+  clearTimeout(_saveT);
+  _saveT=setTimeout(()=>{try{localStorage.setItem(LS_STATE,JSON.stringify({
+    song:curSong.id, on:M.filter(m=>m.enabled).map(m=>m.slug),
+    vol:Object.fromEntries(M.map(m=>[m.slug,+m.volume.toFixed(3)])),
+    pan:Object.fromEntries(M.map(m=>[m.slug,+m.pan.toFixed(3)])),
+    voice:voiceLevel, master:userMaster, bkvol:BK.vol, bkmode:BK.mode,
+    parts:Object.fromEntries(Object.keys(BK.parts).map(k=>[k,BK.parts[k].enabled])),
+    loop:loopChk.checked
+  }));}catch(e){}},400);
+}
+function loadState(){try{return JSON.parse(localStorage.getItem(LS_STATE));}catch(e){return null;}}
+function applyState(s){
+  if(!s)return;
+  M.forEach((m,i)=>{
+    if(s.on)m.enabled=s.on.includes(m.slug);
+    if(s.vol&&s.vol[m.slug]!=null)m.volume=s.vol[m.slug];
+    if(s.pan&&s.pan[m.slug]!=null)m.pan=s.pan[m.slug];
+    updateAvatar(i);
+  });
+  if(s.voice!=null){voiceLevel=s.voice;const e=$('#voice');if(e)e.value=voiceLevel;}
+  if(s.master!=null){userMaster=s.master;const e=$('#master');if(e)e.value=userMaster;}
+  if(s.bkvol!=null){BK.vol=s.bkvol;const e=$('#bkvol');if(e)e.value=BK.vol;backingGain.gain.value=BK.vol;}
+  if(s.bkmode)BK.mode=s.bkmode;
+  if(s.parts)Object.keys(s.parts).forEach(k=>{if(BK.parts[k])BK.parts[k].enabled=s.parts[k];});
+  if(s.loop!=null)loopChk.checked=s.loop;
+  focus=Math.max(0,M.findIndex(m=>m.enabled));
 }
 
 /* 伴奏パネル */
@@ -325,6 +696,7 @@ async function ensurePart(p){
 
 /* オン/オフ（ボーカル） */
 async function toggle(i){
+  const t=currentPos();                 // タップ時刻を先に確定
   const m=M[i];
   if(mode==='solo'&&!m.enabled)
     M.forEach((o,j)=>{if(o.enabled){o.enabled=false;if(o.gainNode)o.gainNode.gain.setTargetAtTime(0,ctx.currentTime,.02);updateAvatar(j);}});
@@ -335,8 +707,9 @@ async function toggle(i){
     if(isPlaying)startSource(m,currentPos());
   }
   refresh();
+  if(tlMode==='rec') addCue(t, M.filter(x=>x.enabled).map(x=>x.slug), null);
 }
-function refresh(){applyGains();renderHero();renderStrip();}
+function refresh(){applyGains();renderHero();renderStrip();updatePresetUI();updateMediaMeta();saveState();}
 
 /* ゲイン：声は 1/√N で正規化（重ねの厚みは残しつつ合計音量を一定に）。オケは固定→バランス維持 */
 function applyGains(){
@@ -372,20 +745,27 @@ function neededLoads(){
   return arr;
 }
 function play(){
-  if(!M.some(m=>m.enabled))M[0].enabled=true;
+  /* ボーカル0でもOK：オケ(inst)のみ再生する */
   if(ctx.state==='suspended')ctx.resume();
+  if(mediaSink)mediaSink.play().catch(()=>{});   // <audio>再生（ロック画面/バックグラウンド用）
   Promise.all(neededLoads()).then(()=>{
     startAll(pausedOffset>=duration?0:pausedOffset);applyGains();applyBackingGains();
     isPlaying=true;playBtn.textContent='❚❚';tick();M.forEach((m,i)=>updateAvatar(i));refresh();
+    updateMediaMeta();updateMediaState();updateMediaPos();
   });
 }
-function pause(){pausedOffset=currentPos();isPlaying=false;playBtn.textContent='▶';stopAll();cancelAnimationFrame(raf);updateTime();}
-function seekTo(t){pausedOffset=Math.max(0,Math.min(t,duration||0));if(isPlaying)startAll(pausedOffset);updateTime();}
+function pause(){pausedOffset=currentPos();isPlaying=false;playBtn.textContent='▶';stopAll();cancelAnimationFrame(raf);updateTime();updateMediaState();updateMediaPos();}
+function seekTo(t){pausedOffset=Math.max(0,Math.min(t,duration||0));tlActiveIdx=-1;if(isPlaying)startAll(pausedOffset);updateTime();updateMediaPos();}
 function tick(){const p=currentPos();
-  if(duration&&p>=duration-0.03){if(loopChk.checked)startAll(0);else{pause();pausedOffset=0;seekTo(0);return;}}
+  if(duration&&p>=duration-0.03){if(loopChk.checked){tlActiveIdx=-1;startAll(0);}else{pause();pausedOffset=0;seekTo(0);return;}}
+  timelineTick(p);
   updateTime();raf=requestAnimationFrame(tick);}
 function updateTime(){const p=currentPos();timeEl.textContent=fmt(p)+' / '+fmt(duration||0);
-  if(!seek.matches(':active'))seek.value=duration?Math.round(p/duration*1000):0;}
+  if(!seek.matches(':active'))seek.value=duration?Math.round(p/duration*1000):0;
+  const ph=document.querySelector('#tlbar .ph');if(ph)ph.style.left=(p/(duration||234)*100)+'%';
+  if(tlMode==='rec'){const el=$('#recInd');if(el)el.innerHTML=`<span class="dot"></span>記録中 ${fmt(p)}・${cues.length}点`;}
+  const s=p|0;if(s!==_lastMSsec){_lastMSsec=s;updateMediaPos();}}
+let _lastMSsec=-1;
 
 /* 伴奏の変更（再生中は該当ソースだけ差し替え） */
 function refreshBacking(){
@@ -397,15 +777,57 @@ function refreshBacking(){
   }
   updateBackingUI();
 }
-function setBackingMode(m){BK.mode=m;refreshBacking();}
-function togglePart(k){BK.parts[k].enabled=!BK.parts[k].enabled;refreshBacking();}
+function setBackingMode(m){BK.mode=m;refreshBacking();saveState();}
+function togglePart(k){BK.parts[k].enabled=!BK.parts[k].enabled;refreshBacking();saveState();}
+
+/* ===== Media Session（ロック画面/通知の曲情報・操作） ===== */
+const hasMS='mediaSession'in navigator;
+function coverArtwork(){
+  const src=curSong.cover?curSong.cover:iconUrl(M[focus]||M[0]);
+  const type=src.toLowerCase().endsWith('.jpg')||src.toLowerCase().endsWith('.jpeg')?'image/jpeg':'image/png';
+  return [{src,sizes:'512x512',type}];
+}
+let _msSig='';
+function updateMediaMeta(){
+  if(!hasMS)return;
+  const n=activeCount(), art=curSong.cover?curSong.cover:iconUrl(M[focus]||M[0]);
+  const sig=curSong.id+'|'+n+'|'+art;
+  if(sig===_msSig)return; _msSig=sig;
+  try{navigator.mediaSession.metadata=new MediaMetadata({
+    title:curSong.title,
+    artist:n?`Liella!（${n===1?'ソロ':n+'人重ね'}）`:'Liella!',
+    album:'ボーカル重ねミキサー',
+    artwork:coverArtwork()
+  });}catch(e){}
+}
+function updateMediaState(){ if(hasMS)navigator.mediaSession.playbackState=isPlaying?'playing':'paused'; }
+function updateMediaPos(){
+  if(!hasMS||!navigator.mediaSession.setPositionState||!duration)return;
+  try{navigator.mediaSession.setPositionState({duration,position:Math.min(currentPos(),duration),playbackRate:1});}catch(e){}
+}
+function switchSongRel(d){
+  const i=(SONGS.indexOf(curSong)+d+SONGS.length)%SONGS.length;
+  songSel.value=i;loadSong(SONGS[i]);
+}
+function setupMediaSession(){
+  if(!hasMS)return;const ms=navigator.mediaSession;
+  const set=(a,h)=>{try{ms.setActionHandler(a,h);}catch(e){}};
+  set('play',()=>{if(!isPlaying)play();});
+  set('pause',()=>{if(isPlaying)pause();});
+  set('stop',()=>{if(isPlaying)pause();seekTo(0);});
+  set('seekto',d=>{if(d.seekTime!=null)seekTo(d.seekTime);});
+  set('seekforward',d=>seekTo(currentPos()+(d.seekOffset||10)));
+  set('seekbackward',d=>seekTo(currentPos()-(d.seekOffset||10)));
+  if(SONGS.length>1){ set('nexttrack',()=>switchSongRel(1)); set('previoustrack',()=>switchSongRel(-1)); }
+}
 
 /* events */
 playBtn.addEventListener('click',()=>isPlaying?pause():play());
 seek.addEventListener('input',()=>{if(duration)seekTo(seek.value/1000*duration);});
-$('#master').addEventListener('input',e=>{userMaster=+e.target.value;applyGains();});
-$('#voice').addEventListener('input',e=>{voiceLevel=+e.target.value;applyGains();});
-$('#bkvol').addEventListener('input',e=>{BK.vol=+e.target.value;backingGain.gain.setTargetAtTime(BK.vol,ctx.currentTime,.02);});
+$('#master').addEventListener('input',e=>{userMaster=+e.target.value;applyGains();saveState();});
+$('#voice').addEventListener('input',e=>{voiceLevel=+e.target.value;applyGains();saveState();});
+$('#bkvol').addEventListener('input',e=>{BK.vol=+e.target.value;backingGain.gain.setTargetAtTime(BK.vol,ctx.currentTime,.02);saveState();});
+$('#loop').addEventListener('change',saveState);
 $('#bkmode').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setBackingMode(b.dataset.b);});
 $('#spread').addEventListener('click',spreadPan);
 $('#center').addEventListener('click',centerPan);
@@ -418,7 +840,26 @@ $('#reset').addEventListener('click',()=>{
   M.forEach((m,i)=>{const on=(i===0);m.enabled=on;m.pan=0;if(m.gainNode)m.gainNode.gain.setTargetAtTime(on?m.volume:0,ctx.currentTime,.02);
     if(m.panner)m.panner.pan.setTargetAtTime(0,ctx.currentTime,.05);updateAvatar(i);});
   focus=0;refresh();});
-document.addEventListener('keydown',e=>{if(e.code==='Space'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)&&!document.activeElement.classList.contains('av')){e.preventDefault();isPlaying?pause():play();}});
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)&&!document.activeElement.classList.contains('av')){e.preventDefault();isPlaying?pause():play();}});
+
+/* タブ切替 */
+$('.tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;
+  const t=b.dataset.tab;[...document.querySelectorAll('.tab')].forEach(x=>x.classList.toggle('sel',x===b));
+  document.querySelectorAll('.tabpane').forEach(p=>p.classList.toggle('hide',p.id!=='pane-'+t));
+  if(t==='timeline')renderCues();
+});
+$('#stripToggle').addEventListener('click',()=>{
+  const s=$('#strip'), open=s.classList.contains('hide');
+  s.classList.toggle('hide',!open);
+  $('#stripToggle').classList.toggle('open',open);
+  $('#stripToggle').setAttribute('aria-expanded',open?'true':'false');
+});
+/* タイムライン操作 */
+$('#tlmode').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTlMode(b.dataset.tl);});
+$('#tlbar').addEventListener('click',e=>{const r=e.currentTarget.getBoundingClientRect();if(duration)seekTo((e.clientX-r.left)/r.width*duration);});
+$('#tlclear').addEventListener('click',clearCues);
+$('#tlsave').addEventListener('click',saveTimeline);
+$('#tlload').addEventListener('change',e=>{if(e.target.value!=='')loadTimeline(+e.target.value);e.target.value='';});
 
 /* 現在の曲の初期描画＋先頭メンバー先読み（起動／曲切替で共通利用） */
 function initSong(){
@@ -426,9 +867,9 @@ function initSong(){
   $('#voiceKnob').classList.remove('hide');
   buildCluster();buildBacking();
   M[0].enabled=true;focus=0;updateAvatar(0);
-  renderHero();renderStrip();updateTime();
+  renderHero();renderStrip();updateTime();updatePresetUI();updateMediaMeta();updateMediaState();
   Promise.all([ensureLoaded(M[0],0), curSong.stem?ensurePart(BK.parts.full):Promise.resolve()])
-    .then(()=>{applyGains();applyBackingGains();updateTime();});
+    .then(()=>{applyGains();applyBackingGains();updateTime();updateMediaPos();});
 }
 
 /* 曲切替：再生停止→ノード破棄→新曲で再構築 */
@@ -453,7 +894,16 @@ songSel.value=SONGS.indexOf(curSong);
 songSel.addEventListener('change',e=>loadSong(SONGS[+e.target.value]));
 
 /* 起動 */
+buildPresets();
+setTlMode('off');refreshTLLoad();renderCues();
+setupMediaSession();
 initSong();
+/* 前回状態を復元 */
+if(_savedState){
+  applyState(_savedState);
+  buildBacking();updateBackingUI();
+  applyGains();applyBackingGains();renderHero();renderStrip();updatePresetUI();updateMediaMeta();
+}
 </script>
 </body>
 </html>
