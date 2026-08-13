@@ -74,9 +74,22 @@ audio/*.m4a              … 旧フルミックス（STEM_MODE=false 用フォ�
 - 生成スクリプトは会話時のもの。要点：`ffmpeg -ac 2 -f f32le` で読み、numpyで `mem − gain*off` を書き出し `-c:a aac -b:a 160k`。
 - **生WAV `audio/オレンジのままで/`（513MB）は音源ソース。デプロイ除外（.vercelignore済）**。git管理も避けるならローカル保管推奨。
 
+## 曲「UNIVERSE!!」（3曲目・9人ソロver）
+- 素材＝公式のメンバー**ソロver 9本**（1・2期生のみ：かのん/可可/千砂都/すみれ/恋/きな子/メイ/四季/夏美。3期生マルガレーテ・冬毬は不参加）＋off vocal＋フルミックス。
+- 生成はオレンジと同方式（**ソロver − off vocal の位相相殺**）。各ソロverの時間オフセットが個別（-281〜+200サンプル）だったため、`universe_subtract.py`は**±1.5sの粗探索＋微探索**でlagを自動決定。相殺は全員 introCancel ≈ 21dB。`full.m4a`＝off vocal、`drums/bass/other`＝フルミックス01のDemucs 4ステム。
+- アプリは**曲ごとに在籍メンバーが変わる**対応：`SONGS[].members` を9人サブセットに。プリセットは在籍者だけに絞って表示・カウント・ハイライト（`effSlugs`/`presetEmpty`）。例：UNIVERSE!!では3期生チップは非表示、KALEIDOSCORE=2人・5yncri5e!=4人。
+- `initSong()` で `buildPresets()` を呼び、曲切替時にプリセットを再構築（在籍者数を反映）。
+- 生WAV `audio/UNIBERSE!!/`（486MB）はデプロイ除外（.vercelignore済）。カバーは `img/universe_cover.jpg`。
+
 ## 便利機能・デザイン
 - **オケ（伴奏）のみ再生**：ボーカルを0人にしても再生可能（`play()`の強制ON廃止）。構成タブに「オケのみ」チップ（`GROUPS`の`inst`＝`slugs:[]`）。
 - **前回状態の記憶**：曲・選択メンバー・各音量/パン・声↔オケ・全体・オケ設定・ループを `localStorage`（`liella_state`）に保存し、次回起動で自動復元（`saveState`/`applyState`）。
+- **配信リンク（Spotify / Apple Music / YouTube Music）＋ジャケ写**：ヒーローを「再生中の曲」カード化。左に各曲のジャケ（`SONGS[].cover`、無い曲はブランドグラデ枠＋♪）、右に曲名＋3サービスのリンクボタン。曲切替で全部連動（`updateServiceLinks`/`svcUrl`）。
+  - URL優先度：`SONGS[].spotify/apple/ytm`（実リンク）→ 無ければ各サービスの検索URL（`open.spotify.com/search`、`music.apple.com/jp/search`、`music.youtube.com/search`）。
+  - 実リンク：spotify orange=6dadcX0AZur4CcsU2TPqJC / universe=27rVLAVa8XxQwugu3LqQ3H、apple orange=album/1825102105 / universe=album/1765314184。スキップ・カプセルは全サービス検索。
+- 「かのんだけに」ボタンは廃止（「全員」「オケのみ」等で代替できるため）。
+- **ジャケ写でUIの色が変わる**：カバー画像から鮮やかな代表色を抽出（canvasで24pxに縮小→彩度×明度スコア最大の色）。`--theme`/`--themeSoft` に設定し、ページ背景（上部を淡くティント→白）と「再生中の曲」カードに反映。曲切替で0.5sフェード。ジャケ無し曲はブランド青。実装：`applyCoverTheme`/`setTheme`（同一オリジンなのでcanvasは非汚染）。
+- **キャラ周りをコンパクト化**：アイコン ring 78→60px（モバイル64→52）、間隔・ヒーロー高さ（190→152）・立ち絵・ジャケ(66→54)を縮小して初期表示を圧縮。
 - **公式サイト風デザイン**：ラブライブ！スーパースター!! 公式の配色を参照。ブランドグラデ `linear-gradient(135deg,#2E47FB→#E40080→#FF0043)`（`--grad`）を再生ボタン/タブ/チップ/曲ピル/天面バーに適用。タイトルは「✦Liella!」をグラデ文字（background-clip:text）に。フォントは Noto Sans JP 優先、白基調。
 
 ## スマホ対応・Media Session
