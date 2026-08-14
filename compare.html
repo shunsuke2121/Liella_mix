@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liella! 聴き比べ</title>
+<style>
+  :root{--ink:#2a2740;--sub:#8f8aa3;--line:#e9e7f2;--bg:#fff;--band:#f2f1fa;
+    --pink:#ff2d6b;--blue:#2e47fb;--accent:#ff2d6b;
+    --grad:linear-gradient(135deg,#2e47fb 0%,#e40080 55%,#ff0043 100%)}
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:"Noto Sans JP","Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo",system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  body::before{content:"";position:fixed;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#2e47fb,#e40080,#ff0043);z-index:100}
+  .wrap{max-width:820px;margin:0 auto;padding:22px 14px 96px}
+  .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .home{width:32px;height:32px;flex:0 0 auto;display:grid;place-items:center;border-radius:50%;background:var(--grad);color:#fff;text-decoration:none;font-size:15px;font-weight:900}
+  .top h1{margin:0;font-size:17px;font-weight:900}
+  .songSel{margin-left:auto;font-family:inherit;font-size:12.5px;font-weight:800;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer}
+  .lead{color:var(--sub);font-size:12px;line-height:1.8;margin:8px 0 0}
+
+  /* いま聴いている人 */
+  .now{margin-top:16px;border-radius:20px;background:var(--band);background-image:linear-gradient(120deg,var(--tin,rgba(46,71,251,.16)),rgba(255,255,255,0) 72%);
+       display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line)}
+  .now img{width:62px;height:62px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.14);background:#fff}
+  .now .t{flex:1;min-width:0}
+  .now .k{font-size:10.5px;font-weight:900;letter-spacing:.12em;color:var(--sub)}
+  .now .n{font-size:21px;font-weight:900;color:var(--cd,#33313a);line-height:1.15;margin-top:2px}
+  .now .c{font-size:11.5px;color:var(--sub);margin-top:3px}
+
+  /* メンバー切替 */
+  .picker{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+  .p{position:relative;width:62px;text-align:center;cursor:pointer;border:none;background:none;font-family:inherit;padding:0}
+  .p img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:3px solid #e7e5ec;background:#fff;filter:grayscale(.8) opacity(.62);transition:.16s}
+  .p .n{font-size:10px;font-weight:800;color:var(--sub);margin-top:4px;line-height:1.2}
+  .p:hover img{transform:translateY(-2px)}
+  .p.on img{border-color:var(--c);filter:none;transform:translateY(-3px);box-shadow:0 6px 16px var(--cg)}
+  .p.on .n{color:var(--cd)}
+  .p .ld{position:absolute;top:16px;left:50%;transform:translateX(-50%);width:20px;height:20px;border:3px solid var(--c);border-top-color:transparent;border-radius:50%;display:none;animation:sp .8s linear infinite}
+  .p.loading .ld{display:block}
+  .p.loading img{filter:grayscale(1) opacity(.3)}
+  @keyframes sp{to{transform:translateX(-50%) rotate(360deg)}}
+
+  /* プレーヤー */
+  .bar{position:sticky;bottom:12px;margin-top:18px;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:18px;padding:12px 15px;box-shadow:0 10px 30px rgba(80,60,120,.14)}
+  .row{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .play{width:52px;height:52px;border:none;border-radius:50%;cursor:pointer;color:#fff;font-size:20px;background:var(--grad);display:grid;place-items:center;box-shadow:0 6px 16px rgba(46,71,251,.32)}
+  .play:active{transform:scale(.95)}
+  .time{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--sub);min-width:86px}
+  .seek{flex:1 1 100%;order:5;accent-color:var(--accent);height:26px;cursor:pointer}
+  .chk{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800;color:var(--sub);cursor:pointer;white-space:nowrap}
+  .chk input{width:17px;height:17px;accent-color:var(--accent)}
+  .btn{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 13px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;color:var(--sub);white-space:nowrap}
+  .btn:hover{border-color:var(--accent);color:var(--accent)}
+  .btn.on{background:var(--grad);color:#fff;border-color:transparent}
+  .ab{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:11.5px;color:var(--sub)}
+  .knob{display:flex;align-items:center;gap:7px;flex:1 1 150px;font-size:11.5px;font-weight:800;color:var(--sub)}
+  .knob input{flex:1;accent-color:var(--accent)}
+  .hint{font-size:11.5px;color:var(--sub);line-height:1.9;margin-top:14px}
+  kbd{background:#f6f5f9;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;font-size:11px;font-family:inherit}
+  .warn{display:none;background:#fff3f3;border:1px solid #ffc9c9;color:#c0392b;padding:11px 13px;border-radius:12px;font-size:12.5px;margin-top:12px}
+  .warn.show{display:block}
+  @media(max-width:560px){
+    .wrap{padding:18px 12px 90px}
+    .now .n{font-size:18px}.now img{width:52px;height:52px}
+    .picker{gap:6px}.p{width:52px}.p img{width:44px;height:44px}.p .n{font-size:9.5px}
+    .bar{padding:10px 12px;border-radius:16px}
+    #prev,#next{display:none}            /* スマホはアイコンを直接タップ */
+    .play{width:48px;height:48px;font-size:18px}
+    .time{min-width:0;font-size:12px}
+    .ab{gap:6px;margin-top:8px;padding-top:8px}
+    .ab .btn{padding:7px 11px;font-size:11.5px}
+    .knob{flex:1 1 100%}
+    .songSel{margin-left:0;flex:1 1 100%;order:3}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a class="home" href="index.html" title="ポータルへ">✦</a><h1>聴き比べ</h1>
+    <select class="songSel" id="songSel" aria-label="曲を選ぶ"></select></div>
+  <p class="lead">同じ場所を、メンバーを切り替えながら聴き比べ。全員が同じタイミングで鳴っているので、アイコンを押した瞬間に声だけが入れ替わります。</p>
+  <div class="warn" id="warn">⚠️ 音源が読み込めませんでした。ローカルで開く場合は <code>start.bat</code> から起動してください。</div>
+
+  <section class="now" id="now">
+    <img id="nowImg" alt="">
+    <div class="t"><div class="k">NOW LISTENING</div><div class="n" id="nowName"></div><div class="c" id="nowCv"></div></div>
+  </section>
+
+  <div class="picker" id="picker"></div>
+
+  <div class="bar">
+    <div class="row">
+      <button class="play" id="play">▶</button>
+      <span class="time" id="time">0:00 / 0:00</span>
+      <label class="chk"><input type="checkbox" id="loop" checked> ループ</label>
+      <button class="btn" id="prev">← 前の人</button>
+      <button class="btn" id="next">次の人 →</button>
+      <input class="seek" type="range" id="seek" min="0" max="1000" value="0">
+    </div>
+    <div class="ab">
+      <span style="font-weight:800;color:var(--ink)">区間リピート</span>
+      <button class="btn" id="setA">A地点</button>
+      <button class="btn" id="setB">B地点</button>
+      <button class="btn" id="clearAB">解除</button>
+      <span id="abLabel">未設定</span>
+      <span class="knob"><span>オケ</span><input type="range" id="instVol" min="0" max="1.2" step="0.01" value="0.55"></span>
+    </div>
+  </div>
+
+  <p class="hint">
+    <kbd>Space</kbd>再生/停止・<kbd>←→</kbd>メンバー切替・<kbd>1〜9</kbd>その人へ・<kbd>A</kbd>/<kbd>B</kbd>区間指定・<kbd>C</kbd>解除。<br>
+    オケのつまみを0にすると声だけで比較できます。区間リピートでサビだけを繰り返すと違いが分かりやすいです。
+  </p>
+</div>
+
+<script src="data.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const AC=window.AudioContext||window.webkitAudioContext;
+const ctx=new AC();
+const master=ctx.createGain();master.gain.value=.95;
+const limiter=ctx.createDynamicsCompressor();
+limiter.threshold.value=-8;limiter.knee.value=6;limiter.ratio.value=12;limiter.attack.value=.003;limiter.release.value=.25;
+master.connect(limiter);limiter.connect(ctx.destination);
+const instGain=ctx.createGain();instGain.gain.value=.55;instGain.connect(master);
+const voxGain=ctx.createGain();voxGain.gain.value=1;voxGain.connect(master);
+
+let song=SONGS.find(s=>s.stem)||SONGS[0];
+let M=[], sel=0, inst={buffer:null,src:null,gain:null,loading:false};
+let isPlaying=false,startTime=0,pausedOffset=0,duration=0,raf=null;
+let A=null,B=null;
+
+function buildMembers(){
+  M=(song.members||MEMBERS).map(m=>({...m,cd:textCol(m.c),cg:tint(m.c,.5),buffer:null,loading:false,gain:null,src:null}));
+}
+
+/* UI */
+function renderPicker(){
+  const box=$('#picker');box.innerHTML='';
+  M.forEach((m,i)=>{
+    const b=document.createElement('button');
+    b.className='p'+(i===sel?' on':'')+(m.loading?' loading':'');
+    b.style.cssText=`--c:${m.c};--cd:${m.cd};--cg:${m.cg}`;
+    b.innerHTML=`<span class="ld"></span><img src="${iconOf(m)}" alt="${m.name}"><div class="n">${m.name}</div>`;
+    b.addEventListener('click',()=>select(i));
+    box.appendChild(b);
+  });
+}
+function renderNow(){
+  const m=M[sel];if(!m)return;
+  $('#now').style.setProperty('--tin',tint(m.c,.3));
+  $('#now').style.setProperty('--cd',m.cd);
+  $('#nowImg').src=iconOf(m);$('#nowName').textContent=m.name;$('#nowCv').textContent=m.cv.replace('CV.','CV. ');
+}
+function updateSel(){
+  [...$('#picker').children].forEach((el,i)=>{
+    el.classList.toggle('on',i===sel);
+    el.classList.toggle('loading',M[i].loading);
+  });
+  renderNow();
+}
+
+/* 読み込み */
+async function loadMember(m){
+  if(m.buffer||m.loading)return;
+  m.loading=true;updateSel();
+  try{
+    const res=await fetch(encodeURI(song.vocalBase+m.slug+'.m4a'));
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    m.buffer=await ctx.decodeAudioData(await res.arrayBuffer());
+    if(!duration)duration=m.buffer.duration;
+    m.gain=ctx.createGain();m.gain.gain.value=0;m.gain.connect(voxGain);
+  }catch(e){$('#warn').classList.add('show');}
+  finally{m.loading=false;updateSel();}
+}
+async function loadInst(){
+  if(inst.buffer||inst.loading)return;
+  inst.loading=true;
+  try{
+    const res=await fetch(encodeURI(song.instBase+song.full.file));
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    inst.buffer=await ctx.decodeAudioData(await res.arrayBuffer());
+    if(!duration)duration=inst.buffer.duration;
+    inst.gain=ctx.createGain();inst.gain.gain.value=1;inst.gain.connect(instGain);
+  }catch(e){$('#warn').classList.add('show');}
+  finally{inst.loading=false;}
+}
+
+/* 再生 */
+const pos=()=>isPlaying?Math.min(ctx.currentTime-startTime,duration||0):pausedOffset;
+function startOne(o,off){
+  if(!o.buffer||!o.gain)return;
+  if(o.src){try{o.src.onended=null;o.src.stop();}catch(e){}}
+  const s=ctx.createBufferSource();s.buffer=o.buffer;s.connect(o.gain);
+  s.start(0,Math.min(off,o.buffer.duration));o.src=s;
+}
+function startAll(off){
+  M.forEach(m=>{if(m.buffer)startOne(m,off);});
+  if(inst.buffer)startOne(inst,off);
+  startTime=ctx.currentTime-off;applyVox();
+}
+function stopAll(){
+  M.forEach(m=>{if(m.src){try{m.src.onended=null;m.src.stop();}catch(e){}m.src=null;}});
+  if(inst.src){try{inst.src.onended=null;inst.src.stop();}catch(e){}inst.src=null;}
+}
+function applyVox(){
+  M.forEach((m,i)=>{if(m.gain)m.gain.gain.setTargetAtTime(i===sel?1:0,ctx.currentTime,.012);});
+}
+async function play(){
+  if(ctx.state==='suspended')ctx.resume();
+  await Promise.all([loadInst(),loadMember(M[sel])]);
+  if(!M[sel].buffer&&!inst.buffer)return;
+  startAll(pausedOffset>=duration?0:pausedOffset);
+  isPlaying=true;$('#play').textContent='❚❚';tick();
+}
+function pause(){pausedOffset=pos();isPlaying=false;$('#play').textContent='▶';stopAll();cancelAnimationFrame(raf);updateTime();}
+function seekTo(t){
+  const lo=A!=null?A:0, hi=B!=null?B:(duration||0);
+  pausedOffset=Math.max(0,Math.min(t,duration||0));
+  if(A!=null&&B!=null&&(pausedOffset<lo||pausedOffset>hi))pausedOffset=lo;
+  if(isPlaying)startAll(pausedOffset);
+  updateTime();
+}
+function tick(){
+  const p=pos();
+  if(A!=null&&B!=null&&p>=B-0.02){startAll(A);}
+  else if(duration&&p>=duration-0.03){ if($('#loop').checked)startAll(A!=null?A:0); else {pause();seekTo(0);return;} }
+  updateTime();raf=requestAnimationFrame(tick);
+}
+function updateTime(){
+  const p=pos();$('#time').textContent=fmtTime(p)+' / '+fmtTime(duration||0);
+  const sk=$('#seek');if(!sk.matches(':active'))sk.value=duration?Math.round(p/duration*1000):0;
+}
+
+/* 選択（読み込み中でも即座に切替、届き次第鳴る） */
+async function select(i){
+  if(i<0||i>=M.length)return;
+  sel=i;updateSel();applyVox();
+  const m=M[i];
+  if(!m.buffer){
+    await loadMember(m);
+    if(m.buffer&&isPlaying)startOne(m,pos());
+    applyVox();
+  }
+}
+
+/* 区間リピート */
+function updateAB(){
+  $('#abLabel').textContent = (A==null&&B==null)?'未設定'
+    : `${A==null?'—':fmtTime(A)} 〜 ${B==null?'—':fmtTime(B)}`;
+  $('#setA').classList.toggle('on',A!=null);
+  $('#setB').classList.toggle('on',B!=null);
+}
+
+/* 曲切替 */
+async function loadSong(s){
+  if(s===song)return;
+  if(isPlaying)pause();
+  stopAll();
+  song=s;duration=0;pausedOffset=0;A=B=null;sel=0;
+  inst={buffer:null,src:null,gain:null,loading:false};
+  buildMembers();renderPicker();renderNow();updateAB();updateTime();
+  await Promise.all([loadInst(),loadMember(M[0])]);
+  updateTime();
+}
+
+/* events */
+$('#play').addEventListener('click',()=>isPlaying?pause():play());
+$('#seek').addEventListener('input',()=>{if(duration)seekTo($('#seek').value/1000*duration);});
+$('#prev').addEventListener('click',()=>select((sel-1+M.length)%M.length));
+$('#next').addEventListener('click',()=>select((sel+1)%M.length));
+$('#instVol').addEventListener('input',e=>instGain.gain.setTargetAtTime(+e.target.value,ctx.currentTime,.02));
+$('#setA').addEventListener('click',()=>{A=pos();if(B!=null&&B<=A)B=null;updateAB();});
+$('#setB').addEventListener('click',()=>{const p=pos();if(A==null||p>A){B=p;}updateAB();});
+$('#clearAB').addEventListener('click',()=>{A=B=null;updateAB();});
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;
+  const k=e.key.toLowerCase();
+  if(e.code==='Space'){e.preventDefault();isPlaying?pause():play();}
+  else if(k==='arrowright'){e.preventDefault();select((sel+1)%M.length);}
+  else if(k==='arrowleft'){e.preventDefault();select((sel-1+M.length)%M.length);}
+  else if(/^[1-9]$/.test(k)){const i=+k-1;if(i<M.length){e.preventDefault();select(i);}}
+  else if(k==='a'){e.preventDefault();$('#setA').click();}
+  else if(k==='b'){e.preventDefault();$('#setB').click();}
+  else if(k==='c'){e.preventDefault();$('#clearAB').click();}
+});
+if(location.protocol==='file:')$('#warn').classList.add('show');
+
+/* 起動 */
+const songSel=$('#songSel');
+SONGS.filter(s=>s.stem).forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.title;songSel.appendChild(o);});
+songSel.value=song.id;
+songSel.addEventListener('change',e=>loadSong(SONGS.find(s=>s.id===e.target.value)));
+buildMembers();renderPicker();renderNow();updateAB();updateTime();
+Promise.all([loadInst(),loadMember(M[0])]).then(updateTime);
+</script>
+</body>
+</html>
